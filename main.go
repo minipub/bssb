@@ -9,7 +9,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprint(os.Stderr, "Please input bytes argument.\n")
+		fmt.Fprint(os.Stderr, "Please input Go bytes argument.\n")
 		os.Exit(1)
 	}
 
