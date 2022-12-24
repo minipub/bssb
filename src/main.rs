@@ -3,7 +3,9 @@ use std::str;
 
 #[derive(Parser, Debug)]
 struct Args {
-    string: Option<String>,
+    #[arg(short, long)]
+    bytes: Option<String>,
+    #[arg(short, long)]
     sep: Option<String>,
 }
 
@@ -17,7 +19,7 @@ fn main() {
 
     let mut bs: Vec<u8> = Vec::new();
 
-    for i in args.string.unwrap().split(&sep) {
+    for i in args.bytes.unwrap().split(&sep) {
         let b = match i.parse::<u8>() {
             Ok(x) => x,
             Err(e) => {
@@ -25,12 +27,9 @@ fn main() {
                 std::process::exit(1);
             }
         };
-        // println!("b: {:?}", b);
 
         bs.push(b);
     }
-
-    // println!("{:?}", &bs);
 
     println!("{}", str::from_utf8(&bs).unwrap());
 }
