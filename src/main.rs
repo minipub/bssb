@@ -1,19 +1,19 @@
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use std::str;
 
-/// Bytes & String type bidirectional conversion
 #[derive(Parser, Debug)]
+#[clap(name = "bssb", version = "0.1.1")]
 struct Opts {
     #[clap(subcommand)]
-    mode: Mode,
+    subcmd: SubCommand,
 }
 
-#[derive(Parser, Debug)]
-enum Mode {
+#[derive(Subcommand, Debug)]
+enum SubCommand {
     /// Mode: string to bytes
-    S(Sargs),
+    S2b(Sargs),
     /// Mode: bytes to string
-    B(Bargs),
+    B2s(Bargs),
 }
 
 trait Printer {
@@ -23,41 +23,41 @@ trait Printer {
 #[derive(Parser, Debug)]
 struct Sargs {
     /// String words
-    string: Option<String>,
+    #[clap(short, long)]
+    words: String,
 }
 
 impl Printer for Sargs {
     fn print(&self) {
-        println!("hello sargs");
+        let bs = self.words.clone().into_bytes();
+        println!("{:?}", &bs);
     }
 }
 
 #[derive(Parser, Debug)]
 struct Bargs {
-    /// Bytes vector words
-    #[arg(short, long)]
-    bytes: Option<String>,
-    /// Separator between vector words
-    #[arg(short, long)]
+    /// Bytes vector
+    #[clap(short, long)]
+    bytes: String,
+    /// Separator between bytes vector
+    #[clap(short, long)]
     sep: Option<String>,
 }
 
 impl Printer for Bargs {
     fn print(&self) {
-        let args = Bargs::parse();
-
-        let sep = match args.sep {
+        let sep = match &self.sep {
             Some(s) => s,
-            None => " ".to_string(),
+            None => " ",
         };
 
         let mut bs: Vec<u8> = Vec::new();
 
-        for i in args.bytes.unwrap().split(&sep) {
+        for i in self.bytes.split(&sep) {
             let b = match i.parse::<u8>() {
                 Ok(x) => x,
                 Err(e) => {
-                    eprintln!("not u8: {:?}, error: {:?}", i, e);
+                    eprintln!("not u8, ele: {:?}, sep: {:?}, error: {:?}", i, sep, e);
                     std::process::exit(1);
                 }
             };
@@ -71,9 +71,11 @@ impl Printer for Bargs {
 
 fn main() {
     let opts: Opts = Opts::parse();
-    let p: Box<dyn Printer> = match opts.mode {
-        Mode::S(s) => Box::new(s),
-        Mode::B(b) => Box::new(b),
+    // println!("opts: {:?}", opts);
+
+    let p: Box<dyn Printer> = match opts.subcmd {
+        SubCommand::S2b(s) => Box::new(s),
+        SubCommand::B2s(b) => Box::new(b),
     };
     p.print();
 }
