@@ -25,12 +25,25 @@ struct Sargs {
     /// String words
     #[clap(short, long)]
     words: String,
+    /// Separator between string words
+    #[clap(short, long)]
+    sep: Option<String>,
 }
 
 impl Printer for Sargs {
     fn print(&self) {
+        let sep = match &self.sep {
+            Some(s) => s,
+            None => " ",
+        };
+
         let bs = self.words.clone().into_bytes();
-        println!("{:?}", &bs);
+
+        let ss = bs.into_iter().map(|x| x.to_string());
+
+        let vs: Vec<String> = ss.rev().collect();
+
+        println!("{}", vs.join(sep));
     }
 }
 
